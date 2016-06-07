@@ -9,7 +9,7 @@ Resource          aps.robot
 
 *** Variables ***
 ${lot.titleEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-default"]/a/div/h4/div/div[@class="col-md-9"]/p/b    # заголовок лота на странице редктирования
-${lot.hrefEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-default"]/a    # сслка для раскрытия блока лота на странице редактирования
+${lot.hrefEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-default"]/a    # ссылка для раскрытия блока лота на странице редактирования
 ${lot.btnEditEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-default"]/div/div/div/div/button[@class="btn btn-dark_blue btn-sm"]    # кнопка редактирования лота
 ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-default"]/div/div/div/div/button[@class="btn btn-yellow btn-sm"]    # кнопка удаления лота
 
@@ -25,11 +25,12 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     ${lot_title}=    Get From List    ${ARGUMENTS}    2
     ${index}=    Get From List    ${ARGUMENTS}    1
     ${items}=    Get From List    ${ARGUMENTS}    0
+    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Заповнити позицію до лоту    ${ARGUMENTS}
     ${editItemDetails}=    Get From Dictionary    ${items[${index}]}    description
     Log To Console    id=editItemDetails \ \ ${editItemDetails}
     Input text    id=editItemDetails    ${editItemDetails}
-    Run Keyword If    '${mode}'=='multiLot'    Select From List By Label    lot_combo    ${lot_title}
-    \    #
+    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Select From List By Label    lot_combo    ${lot_title}
+    \    #    '${mode}'=='multiLot'    ${items[${index}]}
     ${unit}=    Get From Dictionary    ${items[${index}]}    unit
     ${tov}=    Get From Dictionary    ${unit}    code
     ${editItemQuantity}=    Get From Dictionary    ${items[${index}]}    quantity
@@ -37,9 +38,9 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     Click Element    xpath=//button[@data-id="tov"]
     Input Text    id=input_tov    ${tov}
     Press Key    id=input_tov    \\\13
+    #choise CPV
     ${cpv_id}=    Get From Dictionary    ${items[0].classification}    id
     ${dkpp_id}=    Get From Dictionary    ${items[0].additionalClassifications[0]}    id
-    #choise CPV
     Click Element    id=button_add_cpv
     Input Text    id=cpv_search    ${cpv_id}
     sleep    2
@@ -52,7 +53,6 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     sleep    2
     Press Key    id=dkpp_search    \\\13
     Click Element    id=populate_dkpp
-    Comment    ---------------------------------------------
     Click Element    css=div.checkbox > label
     ${countryName}=    Get From Dictionary    ${items[0].deliveryAddress}    countryName_en
     ${latitude}=    Get From Dictionary    ${items[0].deliveryLocation}    latitude
@@ -130,6 +130,7 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     \    Click Button    button_add_lot
     \    Додати предмет    ${tender_data}    ${INDEX}    ${txt_title}
     \    Log To Console    item ${INDEX} added
+    \    \    #
 
 Додати багато предметів
     [Arguments]    @{ARGUMENTS}
@@ -151,7 +152,6 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     ${starttime}=    Get Current Date
     sleep    2
     ${tender_id}=    Get Text    id=titleTenderGid
-    log    ${tender_id}
     [Return]    ${tender_id}
 
 TenderInfo
@@ -161,16 +161,12 @@ TenderInfo
     ${budget}=    Get From Dictionary    ${tender_data.value}    amount
     ${step_rate}=    Get From Dictionary    ${tender_data.minimalStep}    amount
     \    #
-    Log To Console    ${locator.tenderTitle} \ \ ${title}
     Input text    ${locator.tenderTitle}    ${title}
-    Log To Console    ${locator.tenderDetail}+' '+${description}
     Input text    ${locator.tenderDetail}    ${description}
-    Log To Console    ${locator.tenderBudget}+' '+${budget}
     ${text}=    Convert To Number    ${budget}
     Input text    ${locator.tenderBudget}    ${budget}
     ${text}=    Convert To String    ${step_rate}
     Input text    ${locator.tenderStep}    ${text}
-    Log To Console    ${locator.tenderStep}+' '+${step_rate}
 
 Заповнити дати тендеру
     [Arguments]    ${enquiryPeriod}    ${tenderPeriod}
