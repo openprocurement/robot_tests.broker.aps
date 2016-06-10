@@ -25,7 +25,7 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     ${lot_title}=    Get From List    ${ARGUMENTS}    2
     ${index}=    Get From List    ${ARGUMENTS}    1
     ${items}=    Get From List    ${ARGUMENTS}    0
-    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Заповнити позицію до лоту    ${ARGUMENTS}
+    #Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Заповнити позицію до лоту    ${ARGUMENTS}
     ${editItemDetails}=    Get From Dictionary    ${items[${index}]}    description
     Log To Console    id=editItemDetails \ \ ${editItemDetails}
     Input text    id=editItemDetails    ${editItemDetails}
@@ -139,7 +139,6 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     ${Items_length}=    Get Length    ${items}
     : FOR    ${INDEX}    IN RANGE    0    ${Items_length}
     \    Додати предмет    ${items}    ${INDEX}    0
-    \    Log To Console    item ${INDEX} added
 
 Опублікувати тендер
     Sleep    3
@@ -151,7 +150,7 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     Click Button    btnView
     ${starttime}=    Get Current Date
     sleep    2
-    ${tender_id}=    Get Text    id=titleTenderGid
+    ${tender_id}=    Get Text    id=titleTenderCode
     [Return]    ${tender_id}
 
 TenderInfo
