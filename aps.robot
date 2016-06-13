@@ -5,15 +5,14 @@ Library           DateTime
 Library           Collections
 Library           Screenshot
 Resource          APStender_subkeywords.robot
-Resource          ../keywords.robot
 
 *** Variables ***
 ${item_index}     0
 ${locator.tenderID}    xpath=//span[@id='titleTenderCode']
 ${locatorDeals}    id=tab3
 ${locatot.cabinetEnter}    id=login_ribbon
-${locator.emailField}    xpath=//input[@name='LoginBox']
-${locator.passwordField}    xpath=//input[@name='LoginPasswordBox']
+${locator.emailField}    id=LoginBox
+${locator.passwordField}    id=LoginPasswordBox
 ${locator.loginButton}    id=ButtonLogin
 ${locator.buttonTenderAdd}    xpath=//a[@href="tenderadd"]    #id=ButtonTenderAdd
 ${locator.tenderTitle}    id=edtTenderTitle
@@ -32,7 +31,7 @@ ${locator.informationTable}    xpath=//li[@id='tab1']
 ${locator.title}    id=edtTenderTitle
 ${locator.descriptions}    id=edtTenderDetail
 ${locator.value.amount}    id=edtTenderBudget
-${locator.tenderId}    id=titleTenderGid
+${locator.tenderId}    id=titleTenderCode
 ${locator.procuringEntity.name}    id=author_legal_name
 ${locator.enquiryPeriod.startDate}    id=date_enquiry_start
 ${locator.enquiryPeriod.endDate}    id=date_enquiry_end
@@ -81,22 +80,24 @@ ${locator.questions[0].answer}    id=answer
     ...    ... \ \ \ \ \ ${ARGUMENTS[1]} == \ tender_data
     Switch Browser    ${ARGUMENTS[0]}
     Return From Keyword If    '${ARGUMENTS[0]}' != 'aps_Owner'
+    #Адаптуємо дані    Execute Javascript    win
     ${tender_data}=    Get From Dictionary    ${ARGUMENTS[1]}    data
     ${procuringEntity}=    Get From Dictionary    ${tender_data}    procuringEntity
     Set To Dictionary    ${procuringEntity}    name    QA
     ${tender_data}=    Адаптувати дані для оголошення тендера    ${ARGUMENTS[0]}    ${tender_data}
-    \    #
+    \    #    Set Variable
     Click Element    ${locator.buttonTenderAdd}
     TenderInfo    ${tender_data}
     \    #
     Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Click Element    css=label.btn.btn-info
-    Capture Page Screenshot
     Заповнити дати тендеру    ${tender_data.enquiryPeriod}    ${tender_data.tenderPeriod}
     \    #
     sleep    3
     Click Button    ${locator.tenderAdd}
     sleep    3
     \    #
+    Execute Javascript    window.scroll(1500,1500)
+    Capture Page Screenshot
     Run Keyword If    '${TEST NAME}' == 'Можливість оголосити однопредметний тендер'    Додати багато предметів    ${tender_data}
     Run Keyword If    '${TEST NAME}' == 'Можливість оголосити багатопредметний тендер'    Додати багато предметів    ${tender_data}
     Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Додати багато лотів    ${tender_data}
@@ -107,7 +108,7 @@ ${locator.questions[0].answer}    id=answer
 
 Завантажити документ
     [Arguments]    ${username}    ${filepath}    ${tender_UAid}
-    Пошук тендера по ідентифікатору    ${username}     ${tender_UAid}
+    Пошук тендера по ідентифікатору    ${username}    ${tender_UAid}
     Click Button    ButtonTenderEdit
     Click Element    addFile
     Select From List By Label    category_of    Документи закупівлі
@@ -144,6 +145,7 @@ ${locator.questions[0].answer}    id=answer
     Wait Until Page Contains    ${tender_UAid}    10
     Click Element    xpath=//p[@class='cut_title']
     sleep    5
+    \    #
 
 Подати цінову пропозицію
     [Arguments]    @{ARGUMENTS}
@@ -164,42 +166,15 @@ ${locator.questions[0].answer}    id=answer
     [Return]    ${resp}
 
 Додати предмет закупівлі
-    [Arguments]    @{ARGUMENTS}
+    [Arguments]    ${username}    ${tenderID}    ${item}
     Пошук тендера по ідентифікатору    ${username}    ${tenderID}
     Wait Until Page Contains Element    id=ButtonTenderEdit
     Click Element    id=ButtonTenderEdit
-    #${items_count}=    Get Matching Xpath Count
-    Додати предмет    ${username}    ${item}
-    Click Element    id=AddItemButton
+    ${count_item}=    Create List    ${item}
+    Додати предмет    ${count_item}    0    0
+    Click Element    id=btnPublishTop
 
-Додати предмети закупівлі
-    [Arguments]    @{ARGUMENTS}
-    [Documentation]    ${ARGUMENTS[0]} = username
-    ...    ${ARGUMENTS[1]} = ${TENDER_UAID}
-    ...    ${ARGUMENTS[2]} = number
-    Log Many    @{ARGUMENTS}
-    ${items}=    Get From Dictionary    ${ARGUMENTS[1].data}    items
-    ${description}=    Get From Dictionary    ${items[0]}    description
-    ${quantity}=    Get From Dictionary    ${items[0]}    quantity
-    ${cpv}=    Convert To String    Картонки
-    ${cpv_id}=    Get From Dictionary    ${items[0].classification}    id
-    ${cpv_id1}=    Replace String    ${cpv_id}    -    _
-    ${dkpp_desc}=    Get From Dictionary    ${items[0].additionalClassifications[0]}    description
-    ${dkpp_id}=    Get From Dictionary    ${items[0].additionalClassifications[0]}    id
-    ${dkpp_id1}=    Replace String    ${dkpp_id}    -    _
-    Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-    Run keyword if    '${TEST NAME}' == 'Можливість додати позицію закупівлі в тендер'    Додати предмет    ${items}
-    Run keyword if    '${TEST NAME}' != 'Можливість додати позицію закупівлі в тендер'    видалити позиції
-
-додати позицію
-    Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
-    Wait Until Page Contains Element    id=ButtonTenderEdit    10
-    Click Element    id=ButtonTenderEdit
-    Додати багато предметів    ${ARGUMENTS[1]}
-    Wait Until Page Contains Element    id=AddItemButton    10
-    Click Element    id=AddItemButton
-
-видалити позиції
+Видалити предмет закупівлі
     Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     Wait Until Page Contains Element    id=ButtonTenderEdit    10
     Click Element    id=ButtonTenderEdit
@@ -565,13 +540,28 @@ Login
     [Documentation]    [Documentation]
     ...    ... \ \ \ \ \ ${ARGUMENTS[0]} == \ items
     ...    ... \ \ \ \ \ ${ARGUMENTS[1]} == \ ${INDEX}
-    ${index}=    Convert To Integer    ${index}
+    #${index}=    Convert To Integer    ${index}
     ${editItemDetails}=    Get From Dictionary    ${tender_date}    description
     Input text    id=editItemDetails    ${editItemDetails}
     Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Select From List By Label    lot_combo
     ${unit}=    Get From Dictionary    ${tender_date}    unit
     ${tov}=    Get From Dictionary    ${unit}    code
     ${editItemQuantity}=    Get From Dictionary    ${tender_date}    quantity
+    Input Text    id=editItemQuantity    ${editItemQuantity}
+    Click Element    xpath=//button[@data-id="tov"]
+    Input Text    id=input_tov    ${tov}
+    Press Key    id=input_tov    \\\13
+
+Заповнити позиції для багатопредметного тендеру
+    [Arguments]    @{ARGUMENTS}
+    ${editItemDetails}=    Get From Dictionary    ${items}    description
+    Log To Console    id=editItemDetails \ \ ${editItemDetails}
+    Input text    id=editItemDetails    ${editItemDetails}
+    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Select From List By Label    lot_combo
+    \    #    '${mode}'=='multiLot'    ${items[${index}]}
+    ${unit}=    Get From Dictionary    ${items}    unit
+    ${tov}=    Get From Dictionary    ${unit}    code
+    ${editItemQuantity}=    Get From Dictionary    ${items}    quantity
     Input Text    id=editItemQuantity    ${editItemQuantity}
     Click Element    xpath=//button[@data-id="tov"]
     Input Text    id=input_tov    ${tov}
