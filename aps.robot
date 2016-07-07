@@ -64,6 +64,10 @@ ${locator.items[0].quantity}    id=quantity
 ${locator.questions[0].answer}    id=answer
 
 *** Keywords ***
+aps.Підготувати дані для оголошення тендера
+    [Arguments]    ${username}    ${tender_data}
+    [Return]    ${tender_data}
+
 Підготувати клієнт для користувача
     [Arguments]    @{ARGUMENTS}
     [Documentation]    [Documentation] \ Відкрити брaузер, створити обєкт api wrapper, тощо
@@ -80,12 +84,13 @@ ${locator.questions[0].answer}    id=answer
     ...    ... \ \ \ \ \ ${ARGUMENTS[1]} == \ tender_data
     Switch Browser    ${ARGUMENTS[0]}
     Return From Keyword If    '${ARGUMENTS[0]}' != 'aps_Owner'
-    #Адаптуємо дані    Execute Javascript    win
+    #Адаптуємо дані
     ${tender_data}=    Get From Dictionary    ${ARGUMENTS[1]}    data
     ${procuringEntity}=    Get From Dictionary    ${tender_data}    procuringEntity
     Set To Dictionary    ${procuringEntity}    name    QA
     ${tender_data}=    Адаптувати дані для оголошення тендера    ${ARGUMENTS[0]}    ${tender_data}
-    \    #    Set Variable
+    \    #
+    \    #
     Click Element    ${locator.buttonTenderAdd}
     TenderInfo    ${tender_data}
     \    #
@@ -98,7 +103,7 @@ ${locator.questions[0].answer}    id=answer
     \    #
     Execute Javascript    window.scroll(1500,1500)
     Capture Page Screenshot
-    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити однопредметний тендер'    Додати багато предметів    ${tender_data}
+    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити однопредметний тендер'    Додати предмет    ${tender_data}    0    0
     Run Keyword If    '${TEST NAME}' == 'Можливість оголосити багатопредметний тендер'    Додати багато предметів    ${tender_data}
     Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Додати багато лотів    ${tender_data}
     \    #    #
@@ -108,7 +113,7 @@ ${locator.questions[0].answer}    id=answer
 
 Завантажити документ
     [Arguments]    ${username}    ${filepath}    ${tender_UAid}
-    Пошук тендера по ідентифікатору    ${username}    ${tender_UAid}
+    aps.Пошук тендера по ідентифікатору    ${username}    ${tender_UAid}
     Click Button    ButtonTenderEdit
     Click Element    addFile
     Select From List By Label    category_of    Документи закупівлі
@@ -132,12 +137,12 @@ ${locator.questions[0].answer}    id=answer
     Click Link    lnkDownload
     Wait Until Element Is Enabled    addFile
 
-Пошук тендера по ідентифікатору
+aps.Пошук тендера по ідентифікатору
     [Arguments]    ${username}    ${tender_UAid}
     [Documentation]    ${ARGUMENTS[0]} == username
     ...    ${ARGUMENTS[1]} == tenderId
+    Run Keyword If    '${TEST NAME}' == 'Можливість знайти однопредметний тендер по ідентифікатору'    Sleep    80
     Run Keyword And Return If    '${username}' == 'aps_Viewer'    SearchIdViewer    ${tender_UAid}    ${username}
-    Sleep    3
     Go To    ${USERS.users['${username}'].homepage}
     sleep    3
     Input text    id=topsearch    ${tender_UAid}
@@ -145,16 +150,14 @@ ${locator.questions[0].answer}    id=answer
     Wait Until Page Contains    ${tender_UAid}    10
     Click Element    xpath=//p[@class='cut_title']
     sleep    5
-    \    #
 
 Подати цінову пропозицію
     [Arguments]    @{ARGUMENTS}
     [Documentation]    ${ARGUMENTS[0]} == username
     ...    ${ARGUMENTS[1]} == tenderId
     ...    ${ARGUMENTS[2]} == ${test_bid_data}
-    Sleep    300
     Switch Browser    ${ARGUMENTS[0]}
-    Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
+    aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     Reload Page
     Click Element    ${locatorDeals}
     ${amount}=    Get From Dictionary    ${ARGUMENTS[2].data.value}    amount
@@ -167,7 +170,7 @@ ${locator.questions[0].answer}    id=answer
 
 Додати предмет закупівлі
     [Arguments]    ${username}    ${tenderID}    ${item}
-    Пошук тендера по ідентифікатору    ${username}    ${tenderID}
+    aps.Пошук тендера по ідентифікатору    ${username}    ${tenderID}
     Wait Until Page Contains Element    id=ButtonTenderEdit
     Click Element    id=ButtonTenderEdit
     ${count_item}=    Create List    ${item}
@@ -175,7 +178,7 @@ ${locator.questions[0].answer}    id=answer
     Click Element    id=btnPublishTop
 
 Видалити предмет закупівлі
-    Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
+    aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     Wait Until Page Contains Element    id=ButtonTenderEdit    10
     Click Element    id=ButtonTenderEdit
     : FOR    ${INDEX}    IN RANGE    1    ${ARGUMENTS[2]}-1
@@ -192,7 +195,7 @@ ${locator.questions[0].answer}    id=answer
     ...    ${ARGUMENTS[1]} == none
     ...    ${ARGUMENTS[2]} == tenderId
     Switch Browser    ${ARGUMENTS[0]}
-    Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
+    aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     Wait Until Page Contains    Прийом пропозицій    10
     Click Element    id=tab3
     Wait Until Element Is Enabled    id=btnDeleteBid
@@ -254,8 +257,8 @@ Login
     [Return]    ${return_value}
 
 Отримати інформацію про value.valueAddedTaxIncluded
-    ${return_value}=    Отримати текст із поля і показати на сторінці    value.valueAddedTaxIncluded
-    ${return_value}=    Convert To Boolean    без ПДВ.
+    ${return_value}=    Отримати текст із поля і показати на сторінці    value.currency
+    ${return_value}=    Convert To Boolean    50 000,99 грн.
     [Return]    ${return_value}
 
 Отримати інформацію про tenderID
@@ -268,18 +271,22 @@ Login
 
 Отримати інформацію про enquiryPeriod.startDate
     ${return_value}=    Отримати текст із поля і показати на сторінці    enquiryPeriod.startDate
+    ${return_value}=    aps_service.parse_date    ${return_value}
     [Return]    ${return_value}
 
 Отримати інформацію про enquiryPeriod.endDate
     ${return_value}=    Отримати текст із поля і показати на сторінці    enquiryPeriod.endDate
+    ${return_value}=    aps_service.parse_date    ${return_value}
     [Return]    ${return_value}
 
 Отримати інформацію про tenderPeriod.startDate
     ${return_value}=    Отримати текст із поля і показати на сторінці    tenderPeriod.startDate
+    ${return_value}=    aps_service.parse_date    ${return_value}
     [Return]    ${return_value}
 
 Отримати інформацію про tenderPeriod.endDate
     ${return_value}=    Отримати текст із поля і показати на сторінці    tenderPeriod.endDate
+    ${return_value}=    aps_service.parse_date    ${return_value}
     [Return]    ${return_value}
 
 Отримати інформацію про minimalStep.amount
@@ -292,18 +299,16 @@ Login
     Click Element    xpath=//div[@class="col-md-8 col-sm-8 col-xs-7"]
     Capture Page Screenshot
     ${return_value}=    Отримати текст із поля і показати на сторінці    items[0].deliveryDate.endDate
-    ${return_value}=    Convert Date To String    ${return_value}
+    ${return_value}=    aps_service.parse_date    ${return_value}
     [Return]    ${return_value}
 
 Отримати інформацію про items[0].deliveryLocation.latitude
     ${return_value}=    Отримати текст із поля і показати на сторінці    items[0].deliveryLocation.latitude
-    ${return_value}=    Replace String    ${return_value}    ,    .
     ${return_value}=    Convert To Number    ${return_value}
     [Return]    ${return_value}
 
 Отримати інформацію про items[0].deliveryLocation.longitude
     ${return_value}=    Отримати текст із поля і показати на сторінці    items[0].deliveryLocation.longitude
-    ${return_value}=    Replace String    ${return_value}    ,    .
     ${return_value}=    Convert To Number    ${return_value}
     [Return]    ${return_value}
 
@@ -355,7 +360,6 @@ Login
 
 Отримати інформацію про items[0].unit.name
     ${return_value}=    Отримати текст із поля і показати на сторінці    items[0].unit.name
-    ${return_value}=    Remove String    ${return_value}    и
     [Return]    ${return_value}
 
 Отримати інформацію про items[0].unit.code
@@ -380,7 +384,7 @@ Login
     ${title}=    Get From Dictionary    ${ARGUMENTS[2].data}    title
     ${description}=    Get From Dictionary    ${ARGUMENTS[2].data}    description
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-    Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
+    aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     sleep    3
     Wait Until Page Contains Element    xpath=//a[@href="#questions"]    20
     Click Element    xpath=//a[@href="#questions"]
@@ -395,10 +399,12 @@ Login
 
 Отримати інформацію про questions[0].title
     [Arguments]    @{ARGUMENTS[0]}
+    Reload Page
+    sleep    100
+    Reload Page
     Click Element    xpath=//a[@href="#questions"]
     sleep    2
     ${return_value}=    Отримати текст із поля і показати на сторінці    questions[0].title
-    ${return_value}=    Get Text    id=questionTitlespan1
     [Return]    ${return_value}
 
 Отримати інформацію про questions[0].description
@@ -410,6 +416,7 @@ Login
 
 Отримати інформацію про questions[0].date
     ${return_value}=    Отримати текст із поля і показати на сторінці    questions[0].date
+    ${return_value}=    aps_service.parse_date    ${return_value}
     [Return]    ${return_value}
 
 Відповісти на питання
@@ -418,9 +425,11 @@ Login
     ...    ${ARGUMENTS[1]} = tenderUaId
     ...    ${ARGUMENTS[2]} = 0
     ...    ${ARGUMENTS[3]} = answer_data
+    sleep    120
+    Reload Page
     ${answer}=    Get From Dictionary    ${ARGUMENTS[3].data}    answer
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-    Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
+    aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     Wait Until Page Contains Element    xpath=//a[@href="#questions"]    20
     Click Element    xpath=//a[@href="#questions"]
     Sleep    2
@@ -434,24 +443,15 @@ Login
     Wait Until Page Contains    ${answer}    30
     Capture Page Screenshot
 
-Відображення відповіді на запитання
-    [Arguments]    @{ARGUMENTS}
-    Reload Page
-    Click Element    xpath=//a[@href="#questions"]
-    Click Element    css=div.panel-title > div.row > div.col-md-9
-    Click Element    xpath=//div[@class="col-md-5"]/p
-    ${return_value}=    Отримати текст із поля і показати на сторінці    items[0].description
-    [Return]    ${return_value}
-
 Змінити цінову пропозицію
     [Arguments]    @{ARGUMENTS}
     [Documentation]    ${ARGUMENTS[0]} == username
     ...    ${ARGUMENTS[1]} == tenderId
     ...    ${ARGUMENTS[2]} == amount
     ...    ${ARGUMENTS[3]} == amount.value
-    sleep    70
+    sleep    5
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-    Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
+    aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     Click Element    id=tab3
     Click Element    id=btnDeleteBid
     Clear Element Text    id=editBid
@@ -462,8 +462,9 @@ Login
 
 Внести зміни в тендер
     [Arguments]    @{ARGUMENTS}
+    sleep    10
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-    Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
+    aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     Sleep    2
     Click Element    id=ButtonTenderEdit
     Sleep    2
@@ -475,7 +476,8 @@ Login
     Capture Page Screenshot
 
 Отримати інформацію про questions[0].answer
-    sleep    10
+    Reload Page
+    sleep    100
     Reload Page
     Click Element    id=tab2
     Click Element    css=div.panel-title > div.row > div.col-md-9
@@ -486,25 +488,26 @@ Login
     [Arguments]    @{ARGUMENTS}
     [Documentation]    ${ARGUMENTS[1]} == file
     ...    ${ARGUMENTS[2]} == tenderId
+    Reload Page
+    sleep    10
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
     Click Element    ${locatorDeals}
     Sleep    2
     Choose File    id=BidFileUpload    ${ARGUMENTS[1]}
     sleep    2
-    Click Element    xpath=//*[@id='lnkDownload'][@class="btn btn-success"]
+    Click Element    xpath=.//*[@id='lnkDownload'][@class="btn btn-success"]
 
 Змінити документ в ставці
     [Arguments]    @{ARGUMENTS}
     [Documentation]    ${ARGUMENTS[0]} == username
     ...    ${ARGUMENTS[1]} == file
     ...    ${ARGUMENTS[2]} == tenderId
+    sleep    10
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
     Sleep    2
     Click Element    id=deleteBidFileButton
     Click Element    id=Button6
     sleep    2
-    Click Element    id=BidFileUpload
-    Sleep    2
     Choose File    id=BidFileUpload    ${ARGUMENTS[1]}
     sleep    5
     Reload Page
@@ -513,11 +516,9 @@ Login
 Отримати посилання на аукціон для глядача
     [Arguments]    @{ARGUMENTS}
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-    Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
+    aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     Wait Until Page Contains    Аукціон    5
-    Capture Page Screenshot
     ${url} =    Get Element Attribute    xpath=//a[@id="a_auction_url"]@href
-    Log To Console    ${url}
     [Return]    ${url}
 
 Отримати посилання на аукціон для учасника
@@ -528,41 +529,30 @@ Login
     Clear Element Text    id=topsearch
     Click Element    id=inprogress
     Input Text    id=topsearch    ${ARGUMENTS[1]}
-    #Wait Until Page Contains    Аукціон    5
     Click Element    id=btnSearch
     Click Element    xpath=//p[@class='cut_title']
     Capture Page Screenshot
     ${url}=    Get Element Attribute    xpath=//a[@id="labelAuction2"]@href
     [Return]    ${url}
 
-Заповнити позицію до лоту
-    [Arguments]    ${tender_date}
-    [Documentation]    [Documentation]
-    ...    ... \ \ \ \ \ ${ARGUMENTS[0]} == \ items
-    ...    ... \ \ \ \ \ ${ARGUMENTS[1]} == \ ${INDEX}
-    #${index}=    Convert To Integer    ${index}
-    ${editItemDetails}=    Get From Dictionary    ${tender_date}    description
-    Input text    id=editItemDetails    ${editItemDetails}
-    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Select From List By Label    lot_combo
-    ${unit}=    Get From Dictionary    ${tender_date}    unit
-    ${tov}=    Get From Dictionary    ${unit}    code
-    ${editItemQuantity}=    Get From Dictionary    ${tender_date}    quantity
-    Input Text    id=editItemQuantity    ${editItemQuantity}
-    Click Element    xpath=//button[@data-id="tov"]
-    Input Text    id=input_tov    ${tov}
-    Press Key    id=input_tov    \\\13
+Отримати інформацію про status
+    Reload Page
+    Sleep    5
+    ${value}=    Get Text    id=labelTenderStatus
+    # Provider
+    Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати цінову пропозицію першим учасником'    Active.tenderinig    ${value}
+    Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати повторно цінову пропозицію першим учасником'    Active.tenderinig    ${value}
+    Run Keyword And Return If    '${TEST NAME}' == 'Можливість вичитати посилання на участь в аукціоні для першого учасника'    Active.auction_viewer    ${value}
+    # Viewer
+    Run Keyword And Return If    '${TEST NAME}' == 'Можливість вичитати посилання на аукціон для глядача'    Active.auction_viewer    ${value}
+    [Return]    ${return_value}
 
-Заповнити позиції для багатопредметного тендеру
-    [Arguments]    @{ARGUMENTS}
-    ${editItemDetails}=    Get From Dictionary    ${items}    description
-    Log To Console    id=editItemDetails \ \ ${editItemDetails}
-    Input text    id=editItemDetails    ${editItemDetails}
-    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Select From List By Label    lot_combo
-    \    #    '${mode}'=='multiLot'    ${items[${index}]}
-    ${unit}=    Get From Dictionary    ${items}    unit
-    ${tov}=    Get From Dictionary    ${unit}    code
-    ${editItemQuantity}=    Get From Dictionary    ${items}    quantity
-    Input Text    id=editItemQuantity    ${editItemQuantity}
-    Click Element    xpath=//button[@data-id="tov"]
-    Input Text    id=input_tov    ${tov}
-    Press Key    id=input_tov    \\\13
+Active.tenderinig
+    [Arguments]    ${value}
+    ${return_value}=    Replace String    ${value}    Прийом пропозицій    active.tendering
+    [Return]    ${return_value}
+
+Active.auction_viewer
+    [Arguments]    ${value}
+    ${return_value}=    Replace String    ${value}    Аукціон    active.auction
+    [Return]    ${return_value}

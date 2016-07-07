@@ -4,8 +4,9 @@ Library           String
 Library           DateTime
 Library           Collections
 Library           Screenshot
-Library           aps_date_utils.py
 Resource          aps.robot
+Library           aps_service.py
+Library           aps_date_utils.py
 
 *** Variables ***
 ${lot.titleEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-default"]/a/div/h4/div/div[@class="col-md-9"]/p/b    # заголовок лота на странице редктирования
@@ -15,32 +16,34 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
 
 *** Keywords ***
 Додати предмет
-    [Arguments]    @{ARGUMENTS}
-    [Documentation]    ${ARGUMENTS[0]} == items
+    [Arguments]    ${tender_date}    ${index}    ${lot_title}
+    [Documentation]    ${ARGUMENTS[0]} == ${tender_data}
     ...    ${ARGUMENTS[1]} == ${INDEX}
+    ...    ${ARGUMENTS[1]} ==${txt_title} \ \ \ (lots title)
     Wait Until Element Is Enabled    id=AddPoss
     Click Element    id=AddPoss
     Wait Until Page Contains Element    id=AddItemButton    10
     \    #
-    ${lot_title}=    Get From List    ${ARGUMENTS}    2
-    ${index}=    Get From List    ${ARGUMENTS}    1
-    ${items}=    Get From List    ${ARGUMENTS}    0
-    #Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Заповнити позицію до лоту    ${ARGUMENTS}
-    ${editItemDetails}=    Get From Dictionary    ${items[${index}]}    description
+    #${lot_title}=    Get From List    ${ARGUMENTS}    2
+    #${index}=    Get From List    ${ARGUMENTS}    1
+    #${tender_date}=    Get From List    ${ARGUMENTS}    0
+    ${items}=    Get From Dictionary    ${tender_date}    items
+    ${item}=    Get From List    ${items}    ${index}
+    ${editItemDetails}=    Get From Dictionary    ${item}    description
     Log To Console    id=editItemDetails \ \ ${editItemDetails}
     Input text    id=editItemDetails    ${editItemDetails}
-    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Select From List By Label    lot_combo    ${lot_title}
-    \    #    '${mode}'=='multiLot'    ${items[${index}]}
-    ${unit}=    Get From Dictionary    ${items[${index}]}    unit
+    #Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Select From List By Label    lot_combo    ${lot_title}
+    \    #
+    ${unit}=    Get From Dictionary    ${item}    unit
     ${tov}=    Get From Dictionary    ${unit}    code
-    ${editItemQuantity}=    Get From Dictionary    ${items[${index}]}    quantity
+    ${editItemQuantity}=    Get From Dictionary    ${item}    quantity
     Input Text    id=editItemQuantity    ${editItemQuantity}
     Click Element    xpath=//button[@data-id="tov"]
     Input Text    id=input_tov    ${tov}
     Press Key    id=input_tov    \\\13
     #choise CPV
-    ${cpv_id}=    Get From Dictionary    ${items[0].classification}    id
-    ${dkpp_id}=    Get From Dictionary    ${items[0].additionalClassifications[0]}    id
+    ${cpv_id}=    Get From Dictionary    ${item.classification}    id
+    ${dkpp_id}=    Get From Dictionary    ${item.additionalClassifications[0]}    id
     Click Element    id=button_add_cpv
     Input Text    id=cpv_search    ${cpv_id}
     sleep    2
@@ -57,14 +60,13 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     ${countryName}=    Get From Dictionary    ${items[0].deliveryAddress}    countryName_en
     ${latitude}=    Get From Dictionary    ${items[0].deliveryLocation}    latitude
     ${locality}=    Get From Dictionary    ${items[0].deliveryAddress}    locality
-    Capture Page Screenshot
     Wait Until Element Is Enabled    id=latitude
     ${text}=    Convert To String    ${latitude}
     Input Text    id=latitude    ${text}
     ${longitude}=    Get From Dictionary    ${items[0].deliveryLocation}    longitude
     ${text}=    Convert To String    ${longitude}
     Input Text    id=longitude    ${text}
-    Input Text    id=elevation    Высота
+    Input Text    id=elevation    111
     Click Element    id=div_combo_selectCountry
     Wait Until Element Is Visible    input_combo_selectCountry
     Input Text    input_combo_selectCountry    ${countryName}
@@ -104,15 +106,9 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
 
 Додати багато лотів
     [Arguments]    ${tender_data}
-    Wait Until Page Contains Element    ${lot.titleEdt}    50
-    Click Element    ${lot.hrefEdt}
-    Wait Until Element Is Visible    ${lot.btnDelEdt}
-    Click Element    ${lot.btnDelEdt}
-    Wait Until Element Is Visible    button_delete_lot
-    Click Element    button_delete_lot
-    Wait Until Element Is Visible    AddLot
     ${lots}=    Get From Dictionary    ${tender_data}    lots
     ${length}=    Get Length    ${lots}
+    Run Keyword If    '${length}' == 1    DeleteDefaultLot
     : FOR    ${INDEX}    IN RANGE    0    ${length}
     \    Click Element    AddLot
     \    Wait Until Element Is Visible    lot_name
@@ -162,10 +158,11 @@ TenderInfo
     \    #
     Input text    ${locator.tenderTitle}    ${title}
     Input text    ${locator.tenderDetail}    ${description}
-    ${text}=    Convert To Number    ${budget}
-    Input text    ${locator.tenderBudget}    ${budget}
+    ${text}=    Convert To string    ${budget}
+    Input text    ${locator.tenderBudget}    ${text}
     ${text}=    Convert To String    ${step_rate}
     Input text    ${locator.tenderStep}    ${text}
+    Click Element    xpath=.//*[@id='mt']/div[4]/div/div/li/div[5]/div/div[3]/div/div/label/span/label
 
 Заповнити дати тендеру
     [Arguments]    ${enquiryPeriod}    ${tenderPeriod}
@@ -191,7 +188,17 @@ TenderInfo
 
 SearchIdViewer
     [Arguments]    ${tender_UAid}    ${username}
+    sleep    80
     Go To    ${USERS.users['${username}'].homepage}view?TenderID=${tender_UAid}
     log    ${USERS.users['${username}'].homepage}view?TenderID=${tender_UAid}
     Wait Until Page Contains    ${tender_UAid}    10
     Reload Page
+
+DeleteDefaultLot
+    Wait Until Page Contains Element    ${lot.titleEdt}    50
+    Click Element    ${lot.hrefEdt}
+    Wait Until Element Is Visible    ${lot.btnDelEdt}
+    Click Element    ${lot.btnDelEdt}
+    Wait Until Element Is Visible    button_delete_lot
+    Click Element    button_delete_lot
+    Wait Until Element Is Visible    AddLot
