@@ -37,7 +37,7 @@ ${locator.enquiryPeriod.startDate}    id=date_enquiry_start
 ${locator.enquiryPeriod.endDate}    id=date_enquiry_end
 ${locator.tenderPeriod.startDate}    id=date_tender_start
 ${locator.tenderPeriod.endDate}    id=date_tender_end
-${locator.value.valueAddedTaxIncluded}    xpath=//span[@id="lblPDV"]/b
+${locator.value.valueAddedTaxIncluded}    id=lblPDV
 ${locator.minimalStep.amount}    id=edtMinStep
 ${locator.items[0].deliveryLocation.latitude}    id=qdelivlatitude
 ${locator.items[0].deliveryLocation.longitude}    id=qdelivlongitude
@@ -64,7 +64,7 @@ ${locator.items[0].quantity}    id=quantity
 ${locator.questions[0].answer}    id=answer
 
 *** Keywords ***
-aps.Підготувати дані для оголошення тендера
+Підготувати дані для оголошення тендера
     [Arguments]    ${username}    ${tender_data}
     [Return]    ${tender_data}
 
@@ -84,13 +84,12 @@ aps.Підготувати дані для оголошення тендера
     ...    ... \ \ \ \ \ ${ARGUMENTS[1]} == \ tender_data
     Switch Browser    ${ARGUMENTS[0]}
     Return From Keyword If    '${ARGUMENTS[0]}' != 'aps_Owner'
-    #Адаптуємо дані
+    #    Адаптация данных procuringEntity т.к. на площадке имя торгующей организации вносится в кабинете пользователя, а не при создании тендера
     ${tender_data}=    Get From Dictionary    ${ARGUMENTS[1]}    data
     ${procuringEntity}=    Get From Dictionary    ${tender_data}    procuringEntity
     Set To Dictionary    ${procuringEntity}    name    QA
     ${tender_data}=    Адаптувати дані для оголошення тендера    ${ARGUMENTS[0]}    ${tender_data}
-    \    #
-    \    #
+    #
     Click Element    ${locator.buttonTenderAdd}
     TenderInfo    ${tender_data}
     \    #
@@ -104,7 +103,7 @@ aps.Підготувати дані для оголошення тендера
     Execute Javascript    window.scroll(1500,1500)
     Capture Page Screenshot
     Run Keyword If    '${TEST NAME}' == 'Можливість оголосити однопредметний тендер'    Додати предмет    ${tender_data}    0    0
-    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити багатопредметний тендер'    Додати багато предметів    ${tender_data}
+    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити багатопредметний тендер'    Додати багато предметів    ${tender_data}    ${items}
     Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Додати багато лотів    ${tender_data}
     \    #    #
     ${tender_UAid}=    Опублікувати тендер
@@ -257,8 +256,8 @@ Login
     [Return]    ${return_value}
 
 Отримати інформацію про value.valueAddedTaxIncluded
-    ${return_value}=    Отримати текст із поля і показати на сторінці    value.currency
-    ${return_value}=    Convert To Boolean    50 000,99 грн.
+    ${return_value}=    Отримати текст із поля і показати на сторінці    value.valueAddedTaxIncluded
+    ${return_value}=    Convert To Boolean    з ПДВ.
     [Return]    ${return_value}
 
 Отримати інформацію про tenderID
@@ -399,8 +398,7 @@ Login
 
 Отримати інформацію про questions[0].title
     [Arguments]    @{ARGUMENTS[0]}
-    Reload Page
-    sleep    100
+    sleep    120
     Reload Page
     Click Element    xpath=//a[@href="#questions"]
     sleep    2
@@ -476,7 +474,6 @@ Login
     Capture Page Screenshot
 
 Отримати інформацію про questions[0].answer
-    Reload Page
     sleep    100
     Reload Page
     Click Element    id=tab2
@@ -540,15 +537,16 @@ Login
     Sleep    5
     ${value}=    Get Text    id=labelTenderStatus
     # Provider
-    Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати цінову пропозицію першим учасником'    Active.tenderinig    ${value}
-    Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати повторно цінову пропозицію першим учасником'    Active.tenderinig    ${value}
+    Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати цінову пропозицію першим учасником'    Active.tendering_provider    ${value}
+    Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати повторно цінову пропозицію першим учасником'    Active.tendering_provider    ${value}
     Run Keyword And Return If    '${TEST NAME}' == 'Можливість вичитати посилання на участь в аукціоні для першого учасника'    Active.auction_viewer    ${value}
     # Viewer
     Run Keyword And Return If    '${TEST NAME}' == 'Можливість вичитати посилання на аукціон для глядача'    Active.auction_viewer    ${value}
     [Return]    ${return_value}
 
-Active.tenderinig
+Active.tendering_provider
     [Arguments]    ${value}
+    #
     ${return_value}=    Replace String    ${value}    Прийом пропозицій    active.tendering
     [Return]    ${return_value}
 

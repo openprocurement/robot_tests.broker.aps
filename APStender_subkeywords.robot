@@ -6,7 +6,6 @@ Library           Collections
 Library           Screenshot
 Resource          aps.robot
 Library           aps_service.py
-Library           aps_date_utils.py
 
 *** Variables ***
 ${lot.titleEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-default"]/a/div/h4/div/div[@class="col-md-9"]/p/b    # заголовок лота на странице редктирования
@@ -92,7 +91,7 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     ${streetAddress}=    Get From Dictionary    ${items[0].deliveryAddress}    streetAddress
     #add address    -------------------------------------------
     ${deliveryDate}=    Get From Dictionary    ${items[0].deliveryDate}    endDate
-    ${deliveryDate}=    aps_date_utils.Convert Date To String    ${deliveryDate}
+    ${deliveryDate}=    aps_service.Convert Date To String    ${deliveryDate}
     Input Text    id=date_delivery_end    ${deliveryDate}
     \    #
     Click Element    id=post_code
@@ -172,17 +171,17 @@ TenderInfo
     ${tender_start}=    Get From Dictionary    ${tenderPeriod}    startDate
     ${tender_end}=    Get From Dictionary    ${tenderPeriod}    endDate
     #
-    ${dt1}=    aps_date_utils.Convert Date To String    ${enquiry_start}
+    ${dt1}=    aps_service.Convert Date To String    ${enquiry_start}
     Input text    ${locator.tenderComStart}    ${dt1}
     Press Key    ${locator.tenderComStart}    \\\13
-    ${dt2}=    aps_date_utils.Convert Date To String    ${enquiry_end}
+    ${dt2}=    aps_service.Convert Date To String    ${enquiry_end}
     Input text    ${locator.tenderComEnd}    ${dt2}
     Press Key    ${locator.tenderComEnd}    \\\13
     #
-    ${dt3}=    aps_date_utils.Convert Date To String    ${tender_start}
+    ${dt3}=    aps_service.Convert Date To String    ${tender_start}
     Input text    ${locator.tenderStart}    ${dt3}
     Press Key    ${locator.tenderStart}    \\\13
-    ${dt4}=    aps_date_utils.Convert Date To String    ${tender_end}
+    ${dt4}=    aps_service.Convert Date To String    ${tender_end}
     Input text    ${locator.tenderEnd}    ${dt4}
     Press Key    ${locator.tenderEnd}    \\\13
 

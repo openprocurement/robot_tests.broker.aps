@@ -36,8 +36,7 @@ def convert_item_date_to_string(date):
 
 def capitalize_first_letter(string):
     string = string.lower()
-    string = string.capitalize()
-    return string
+
 
 
 
