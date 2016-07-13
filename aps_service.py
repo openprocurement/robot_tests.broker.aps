@@ -36,9 +36,10 @@ def convert_item_date_to_string(date):
 
 def capitalize_first_letter(string):
     string = string.lower()
+    string = string.capitalize()
+    return string
 
 
-
-
-
-
+def adapt_procuringEntity(tender_data):
+    tender_data['data']['procuringEntity']['name'] = u"QA"
+    return tender_data

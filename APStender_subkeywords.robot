@@ -15,7 +15,7 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
 
 *** Keywords ***
 Додати предмет
-    [Arguments]    ${tender_date}    ${index}    ${lot_title}
+    [Arguments]    ${tender_data}    ${index}    ${lot_title}
     [Documentation]    ${ARGUMENTS[0]} == ${tender_data}
     ...    ${ARGUMENTS[1]} == ${INDEX}
     ...    ${ARGUMENTS[1]} ==${txt_title} \ \ \ (lots title)
@@ -26,12 +26,12 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     #${lot_title}=    Get From List    ${ARGUMENTS}    2
     #${index}=    Get From List    ${ARGUMENTS}    1
     #${tender_date}=    Get From List    ${ARGUMENTS}    0
-    ${items}=    Get From Dictionary    ${tender_date}    items
+    ${items}=    Get From Dictionary    ${tender_data}    items
     ${item}=    Get From List    ${items}    ${index}
     ${editItemDetails}=    Get From Dictionary    ${item}    description
     Log To Console    id=editItemDetails \ \ ${editItemDetails}
     Input text    id=editItemDetails    ${editItemDetails}
-    #Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Select From List By Label    lot_combo    ${lot_title}
+    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Select From List By Label    lot_combo    ${lot_title}
     \    #
     ${unit}=    Get From Dictionary    ${item}    unit
     ${tov}=    Get From Dictionary    ${unit}    code
@@ -107,7 +107,7 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     [Arguments]    ${tender_data}
     ${lots}=    Get From Dictionary    ${tender_data}    lots
     ${length}=    Get Length    ${lots}
-    Run Keyword If    '${length}' == 1    DeleteDefaultLot
+    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    DeleteDefaultLot
     : FOR    ${INDEX}    IN RANGE    0    ${length}
     \    Click Element    AddLot
     \    Wait Until Element Is Visible    lot_name
@@ -133,7 +133,7 @@ ${lot.btnDelEdt}    //*[@id="divLotsItemsDynamic"]/div[@class="panel panel-defau
     ${items}=    Get From Dictionary    ${ARGUMENTS[0]}    items
     ${Items_length}=    Get Length    ${items}
     : FOR    ${INDEX}    IN RANGE    0    ${Items_length}
-    \    Додати предмет    ${items}    ${INDEX}    0
+    \    Додати предмет    ${ARGUMENTS[0]}    ${INDEX}    0
 
 Опублікувати тендер
     Sleep    3

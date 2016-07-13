@@ -5,6 +5,7 @@ Library           DateTime
 Library           Collections
 Library           Screenshot
 Resource          APStender_subkeywords.robot
+Library           aps_service.py
 
 *** Variables ***
 ${item_index}     0
@@ -66,6 +67,7 @@ ${locator.questions[0].answer}    id=answer
 *** Keywords ***
 Підготувати дані для оголошення тендера
     [Arguments]    ${username}    ${tender_data}
+    ${tender_data}=    adapt_procuringEntity    ${tender_data}
     [Return]    ${tender_data}
 
 Підготувати клієнт для користувача
@@ -84,11 +86,7 @@ ${locator.questions[0].answer}    id=answer
     ...    ... \ \ \ \ \ ${ARGUMENTS[1]} == \ tender_data
     Switch Browser    ${ARGUMENTS[0]}
     Return From Keyword If    '${ARGUMENTS[0]}' != 'aps_Owner'
-    #    Адаптация данных procuringEntity т.к. на площадке имя торгующей организации вносится в кабинете пользователя, а не при создании тендера
     ${tender_data}=    Get From Dictionary    ${ARGUMENTS[1]}    data
-    ${procuringEntity}=    Get From Dictionary    ${tender_data}    procuringEntity
-    Set To Dictionary    ${procuringEntity}    name    QA
-    ${tender_data}=    Адаптувати дані для оголошення тендера    ${ARGUMENTS[0]}    ${tender_data}
     #
     Click Element    ${locator.buttonTenderAdd}
     TenderInfo    ${tender_data}
@@ -103,7 +101,7 @@ ${locator.questions[0].answer}    id=answer
     Execute Javascript    window.scroll(1500,1500)
     Capture Page Screenshot
     Run Keyword If    '${TEST NAME}' == 'Можливість оголосити однопредметний тендер'    Додати предмет    ${tender_data}    0    0
-    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити багатопредметний тендер'    Додати багато предметів    ${tender_data}    ${items}
+    Run Keyword If    '${TEST NAME}' == 'Можливість оголосити багатопредметний тендер'    Додати багато предметів    ${tender_data}
     Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Додати багато лотів    ${tender_data}
     \    #    #
     ${tender_UAid}=    Опублікувати тендер
@@ -123,20 +121,21 @@ ${locator.questions[0].answer}    id=answer
     Click Element    id=btnPublishTop
 
 Завантажити документ в лот
-    [Arguments]    ${filepath}    ${TENDER_UAID}    ${lot_id}
+    [Arguments]    ${username}    ${filepath}    ${TENDER_UAID}    ${lot_id}
+    aps.Пошук тендера по ідентифікатору    ${username}    ${TENDER_UAID}
     Log To Console    ${filepath}
     Click Button    ButtonTenderEdit
     Click Element    addFile
     Select From List By Label    category_of    Документи закупівлі
     Select From List By Label    file_of    лоту
-    Wait Until Element Is Enabled    FileComboSelection2
+    Wait Until Element Is Enabled    id=FileComboSelection2
     Log To Console    ${lot_id}
-    Select From List By Label    FileComboSelection2    ${lot_id}
-    InputText    TenderFileUpload    ${filepath}
-    Click Link    lnkDownload
+    #Select From List By Label    id=FileComboSelection2    ${lot_id}
+    Choose File    id=TenderFileUpload    ${filepath}
+    Click Link    id=lnkDownload
     Wait Until Element Is Enabled    addFile
 
-aps.Пошук тендера по ідентифікатору
+Пошук тендера по ідентифікатору
     [Arguments]    ${username}    ${tender_UAid}
     [Documentation]    ${ARGUMENTS[0]} == username
     ...    ${ARGUMENTS[1]} == tenderId
@@ -172,8 +171,7 @@ aps.Пошук тендера по ідентифікатору
     aps.Пошук тендера по ідентифікатору    ${username}    ${tenderID}
     Wait Until Page Contains Element    id=ButtonTenderEdit
     Click Element    id=ButtonTenderEdit
-    ${count_item}=    Create List    ${item}
-    Додати предмет    ${count_item}    0    0
+    Додати предмет    ${item}    0    0
     Click Element    id=btnPublishTop
 
 Видалити предмет закупівлі
@@ -256,8 +254,8 @@ Login
     [Return]    ${return_value}
 
 Отримати інформацію про value.valueAddedTaxIncluded
-    ${return_value}=    Отримати текст із поля і показати на сторінці    value.valueAddedTaxIncluded
-    ${return_value}=    Convert To Boolean    з ПДВ.
+    ${value}=    Отримати текст із поля і показати на сторінці    value.valueAddedTaxIncluded
+    ${return_value}=    Run Keyword If    'з ПДВ.' in '${value}'    Set Variable    ${True}
     [Return]    ${return_value}
 
 Отримати інформацію про tenderID
@@ -407,7 +405,6 @@ Login
 
 Отримати інформацію про questions[0].description
     Click Element    css=div.panel-title > div.row > div.col-md-9
-    Capture Page Screenshot
     sleep    2
     ${return_value}=    Отримати текст із поля і показати на сторінці    questions[0].description
     [Return]    ${return_value}
@@ -474,7 +471,7 @@ Login
     Capture Page Screenshot
 
 Отримати інформацію про questions[0].answer
-    sleep    100
+    sleep    120
     Reload Page
     Click Element    id=tab2
     Click Element    css=div.panel-title > div.row > div.col-md-9
@@ -485,7 +482,6 @@ Login
     [Arguments]    @{ARGUMENTS}
     [Documentation]    ${ARGUMENTS[1]} == file
     ...    ${ARGUMENTS[2]} == tenderId
-    Reload Page
     sleep    10
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
     Click Element    ${locatorDeals}
@@ -554,3 +550,49 @@ Active.auction_viewer
     [Arguments]    ${value}
     ${return_value}=    Replace String    ${value}    Аукціон    active.auction
     [Return]    ${return_value}
+
+Створити лот
+    [Arguments]    ${username}    ${tender_uaid}    ${lot}
+    aps.Пошук тендера по ідентифікатору    ${username}    ${tender_uaid}
+    Click Button    ButtonTenderEdit
+    Click Element    id=AddLot
+    ${txt_title}=    Get From Dictionary    ${lot.data}    title
+    Input Text    lot_name    ${txt_title}
+    ${txt}=    Get From Dictionary    ${lot.data}    description
+    Input Text    lot_description    ${txt}
+    ${txt}=    Get From Dictionary    ${lot.data.value}    amount
+    ${txt}=    Convert To String    ${txt}
+    Input Text    lot_budget    ${txt}
+    ${txt}=    Get From Dictionary    ${lot.data.minimalStep}    amount
+    ${txt}=    Convert To String    ${txt}
+    Input Text    lot_auction_min_step    ${txt}
+    Click Element    id=button_add_lot
+
+Видалити лот
+    [Arguments]    ${username}    ${tender_uaid}    ${lot_id}
+    aps.Пошук тендера по ідентифікатору    ${username}    ${tender_uaid}
+    Click Element    xpath=.//*[@id='headingThree']/h4/div[1]/div[2]/p/b[contains(text(), "${lot_id}")]
+    sleep    2
+    Click Element    xpath=.//div/div/div[2]/div[2]/a
+    sleep    3
+    Input Text    id=reason_lot_cancel    Відміна лота
+    Click Element    id=Button3
+
+Змінити лот
+    [Arguments]    ${username}    ${tender_uaid}    ${lot_id}    ${fieldname}    ${fieldvalue}
+    Switch Browser    ${username}
+    aps.Пошук тендера по ідентифікатору    ${username}    ${tender_uaid}
+    Click Button    ButtonTenderEdit
+    Execute Javascript    window.scroll(1500,1500)
+    sleep    3
+    Click Element    xpath=.//*[@id='headingThree']/h4/div[1]/div[2]/p/b[contains(text(), "${lot_id}")]
+    Click Element    ${lot.btnEditEdt}
+    Wait Until Element Is Visible    xpath=.//*[@id='button_delete_lot']
+    Input Text    id=lot_description    ${fieldvalue}
+    Click Element    id=button_add_lot
+
+Додати предмет закупівлі в лот
+    [Arguments]    ${username}    ${tender_uaid}    ${lot_id}    ${item}
+    aps.Пошук тендера по ідентифікатору    ${username}    ${tender_uaid}
+    Click Button    ButtonTenderEdit
+    Додати предмет    ${item}    0    ${lot_id}
