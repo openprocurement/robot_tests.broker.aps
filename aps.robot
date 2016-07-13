@@ -255,7 +255,8 @@ Login
 
 Отримати інформацію про value.valueAddedTaxIncluded
     ${value}=    Отримати текст із поля і показати на сторінці    value.valueAddedTaxIncluded
-    ${return_value}=    Run Keyword If    'з ПДВ.' in '${value}'    Set Variable    ${True}
+    ${return_value}=    Run Keyword And Return If    'без ПДВ.' == '${value}'    Set Variable    ${False}
+    ${return_value}=    Run Keyword And Return If    'з ПДВ.' == '${value}'    Set Variable    ${True}
     [Return]    ${return_value}
 
 Отримати інформацію про tenderID
