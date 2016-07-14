@@ -146,7 +146,7 @@ ${locator.questions[0].answer}    id=answer
     Input text    id=topsearch    ${tender_UAid}
     Click Element    id=btnSearch
     Wait Until Page Contains    ${tender_UAid}    10
-    Click Element    xpath=//p[@class='cut_title']
+    Click Element    xpath=(//p[@class='cut_title'])[last()]
     sleep    5
 
 Подати цінову пропозицію
@@ -205,7 +205,9 @@ Login
     Click Element    ${locatot.cabinetEnter}
     Wait Until Element Is Visible    ${locator.emailField}    10
     Input Text    ${locator.emailField}    ${USERS.users['${ARGUMENTS[0]}'].login}
+    sleep    2
     Input Text    ${locator.passwordField}    ${USERS.users['${ARGUMENTS[0]}'].password}
+    sleep    2
     Click Element    ${locator.loginButton}
 
 Оновити сторінку з тендером
