@@ -433,7 +433,9 @@ Login
     Sleep    2
     Click Element    css=div.panel-title > div.row > div.col-md-9
     Wait Until Page Contains Element    id=answerQuestion    20
+    Sleep    4
     Click Element    id=answerQuestion
+    Sleep    2
     Input text    id=editAnswerDetails    ${answer}
     Click Element    id=AddQuestionButton
     Sleep    2
@@ -545,12 +547,13 @@ Login
 
 Active.tendering_provider
     [Arguments]    ${value}
-    #
+    Sleep    60
     ${return_value}=    Replace String    ${value}    Прийом пропозицій    active.tendering
     [Return]    ${return_value}
 
 Active.auction_viewer
     [Arguments]    ${value}
+    Sleep    60
     ${return_value}=    Replace String    ${value}    Аукціон    active.auction
     [Return]    ${return_value}
 
