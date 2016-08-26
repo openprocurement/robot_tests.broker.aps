@@ -74,9 +74,6 @@ Library           aps_service.py
     #add address    -------------------------------------------
     ${deliveryDate}=    Get From Dictionary    ${item.deliveryDate}    endDate
     ${deliveryDate}=    aps_service.Convert Date To String    ${deliveryDate}
-    #Log To Console    ${deliveryDate}
-    #WaitInputID    date_delivery_end    ${deliveryDate}
-    #Press Key    id=date_delivery_end    \\\13
     \    #
     WaitClickID    post_code
     ${postalCode}    Get From Dictionary    ${item.deliveryAddress}    postalCode
@@ -171,7 +168,7 @@ TenderInfo
 
 SearchIdViewer
     [Arguments]    ${tender_UAid}    ${username}
-    Go To    ${USERS.users['${username}'].homepage}view?#testmodeOn&TenderID=${tender_UAid}
+    Go To    ${USERS.users['${username}'].homepage}/Tenders/${tender_UAid}
     Wait Until Page Contains    ${tender_UAid}    10
 
 DeleteDefaultLot
@@ -213,7 +210,7 @@ WaitInputXPATH
     Wait Until Element Is Enabled    xpath=${id}
     Input Text    xpath=${id}    ${text}
 
-CPV
+CPV(below)
     [Arguments]    ${items}
     ${items}=    Replace String    ${items}    :    ${EMPTY}
     [Return]    ${items}
@@ -245,7 +242,7 @@ lots.value.amount
     ${items}=    Convert To Number    ${items}
     [Return]    ${items}
 
-longitude
+longitudelatitude
     [Arguments]    ${items}
     ${items}=    Convert To Number    ${items}
     [Return]    ${items}

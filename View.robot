@@ -6,9 +6,8 @@ Resource          aps.robot    # Отримання інформації про 
     ${return_value}=    Отримати текст із поля і показати на сторінці    id=edtTenderBudget
 
 aps.Отримати інформацію із тендера
-    [Arguments]    ${username}    ${tender_uaid}    ${field_name}
-    [Documentation]    ${ARGUMENTS[0]} == username
-    ...    ${ARGUMENTS[1]} == fieldname
+    [Arguments]    ${username}    ${field_name}
+    [Documentation]    *SingleItemstendetr* \ \ \ - ${ARGUMENTS[0]} == username \ ${ARGUMENTS[1]} == fieldname \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *below* \ ---- \ \ \ \ (${username} | ${tender_uaid} | ${field_name})
     #Switch browser    ${username}
     #Run Keyword And Return    Отримати інформацію про ${field_name}
     Switch Browser    ${username}
@@ -82,8 +81,8 @@ aps.Отримати інформацію із тендера
     [Return]    ${return_value}
 
 Отримати інформацію про items[0].deliveryDate.endDate
-    #WaitClickXPATH    //div[@class="col-md-8 col-sm-8 col-xs-7"]
-    ${return_value}=    Отримати текст із поля і показати на сторінці    items[0].deliveryDate.endDate    ${EMPTY}
+    WaitClickXPATH    //div[@class="col-md-8 col-sm-8 col-xs-7"]
+    ${return_value}=    Отримати текст із поля і показати на сторінці    items[0].deliveryDate.endDate    1
     ${return_value}=    aps_service.parse_date    ${return_value}
     [Return]    ${return_value}
 
@@ -119,7 +118,7 @@ aps.Отримати інформацію із тендера
 
 Отримати інформацію про items[0].classification.scheme
     ${return_value}=    Отримати текст із поля і показати на сторінці    items[0].classification.scheme    _1
-    ${return_value}=    Remove String    ${return_value}    :
+    ${return_value}=    Replace String    ${return_value}    021:2015:    CPV
     [Return]    ${return_value}
 
 Отримати інформацію про items[0].classification.id
@@ -132,7 +131,7 @@ aps.Отримати інформацію із тендера
 
 Отримати інформацію про items[0].additionalClassifications[0].scheme
     ${return_value}=    Отримати текст із поля і показати на сторінці    items[0].additionalClassifications[0].scheme    _1
-    ${return_value}=    Remove String    ${return_value}    :
+    ${return_value}=    Replace String    ${return_value}    016:2010    ДКПП
     [Return]    ${return_value}
 
 Отримати інформацію про items[0].additionalClassifications[0].id
@@ -180,7 +179,7 @@ aps.Отримати інформацію із тендера
     [Return]    ${return_value}
 
 Отримати інформацію про questions[0].answer
-    sleep    120
+    sleep    210
     Reload Page
     WaitClickXPATH    //a[@href="#questions"]
     WaitClickCSS    div.panel-title > div.row > div.col-md-9
@@ -192,7 +191,7 @@ aps.Отримати інформацію із предмету
     Run Keyword If    '${TEST NAME}' == 'Відображення опису номенклатур тендера'    Click Element    xpath=.//*[@id='headingThree']/h4/div/div[2][contains(text(), '${item_id}')]
     ${item_value}=    Get Text    xpath=.//div[@id='headingThree']/h4/div/div[2][contains(text(), '${item_id}')]/../../../../..${locator.items.${field_name}}
     ###########################################################
-    Run Keyword And Return If    '${TEST NAME}' == 'Відображення схеми класифікації номенклатур тендера'    CPV    ${item_value}
+    Run Keyword And Return If    '${TEST NAME}' == 'Відображення схеми класифікації номенклатур тендера'    CPV(below)    ${item_value}
     Run Keyword And Return If    '${TEST NAME}' == 'Відображення схеми додаткової класифікації номенклатур тендера'    DKPP    ${item_value}
     Run Keyword And Return If    '${TEST NAME}' == 'Відображення дати доставки номенклатур тендера'    deliveryDate    ${item_value}
     Run Keyword And Return If    '${TEST NAME}' == 'Відображення кількості номенклатур тендера'    itemquantity    ${item_value}

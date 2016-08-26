@@ -6,7 +6,7 @@ Library           Collections
 Library           Screenshot
 Resource          APStender_subkeywords.robot
 Library           aps_service.py
-Resource          Відображення.robot
+Resource          View.robot
 Resource          Locators.robot
 
 *** Keywords ***
@@ -60,7 +60,7 @@ Resource          Locators.robot
     Execute Javascript    window.scroll(1500,1500)
     WaitClickID    addFile
     Select From List By Label    category_of    Документи закупівлі
-    Select From List By Label    file_of    тендеру
+    Select From List By Label    file_of    закупівлі
     WaitInputID    TenderFileUpload    ${filepath}
     WaitClickID    lnkDownload
     Wait Until Element Is Enabled    addFile
@@ -87,6 +87,7 @@ Resource          Locators.robot
     ...    ${ARGUMENTS[1]} == tenderId
     Run Keyword If    '${TEST NAME}' == 'Можливість знайти однопредметний тендер по ідентифікатору'    Sleep    300
     #Sleep    200
+    #Run Keyword And Return If    '${username}' == 'aps_Viewer'    SearchIdViewer    ${tender_UAid}    ${username}
     Run Keyword If    '${username}' == 'aps_Viewer'    Go To    ${USERS.users['${username}'].homepage}/#testmodeOn    #SearchIdViewer    ${tender_UAid}    ${username}
     Run Keyword Unless    '${username}' == 'aps_Viewer'    Go To    ${USERS.users['${username}'].homepage}
     WaitInputXPATH    //input[@id='search_text']    ${tender_UAid}
@@ -145,6 +146,7 @@ Resource          Locators.robot
 
 Login
     [Arguments]    @{ARGUMENTS}
+    sleep    5
     Wait Until Element Is Visible    ${locatot.cabinetEnter}    10
     Click Element    ${locatot.cabinetEnter}
     Wait Until Element Is Visible    ${locator.emailField}    10
@@ -183,7 +185,7 @@ Login
     ...    ${ARGUMENTS[1]} = tenderUaId
     ...    ${ARGUMENTS[2]} = 0
     ...    ${ARGUMENTS[3]} = answer_data
-    sleep    120
+    sleep    150
     ${answer}=    Get From Dictionary    ${ARGUMENTS[3].data}    answer
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
     aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
@@ -286,13 +288,10 @@ Login
 
 Отримати інформацію про status
     Reload Page
-    Sleep    5
-    #Log To Console    r1
+    Sleep    10
     Wait Until Page Contains Element    id=labelTenderStatus
-    #Log To Console    r2
     ${value}=    Get Text    id=labelTenderStatus
-    #Log To Console    r3
-    # Provider
+    Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати цінову пропозицію першим учасником'    Sleep    120
     Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати цінову пропозицію першим учасником'    Active.tendering_provider    ${value}
     Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати повторно цінову пропозицію першим учасником'    Active.tendering_provider    ${value}
     Run Keyword And Return If    '${TEST NAME}' == 'Можливість вичитати посилання на участь в аукціоні для першого учасника'    Active.auction_viewer    ${value}

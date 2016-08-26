@@ -34,10 +34,11 @@ ${locator.tenderPeriod.startDate}    id=date_tender_start
 ${locator.tenderPeriod.endDate}    id=date_tender_end
 ${locator.value.valueAddedTaxIncluded}    id=lblPDV
 ${locator.minimalStep.amount}    id=edtMinStep
+${locator.items[0].deliveryDate.endDate}    id=deliv_date_end
 ${locator.items[0].deliveryLocation.latitude}    id=qdelivlatitude
 ${locator.items[0].deliveryLocation.longitude}    id=qdelivlongitude
 ${locator.items[0].deliveryAddress.postalCode}    id=qdelivaddrpost_code
-${locator.items[0].deliveryAddress.countryName}    id=qdelivaddrcountry
+${locator.items[0].deliveryAddress.countryName}    id=_qdelivaddrcountry
 ${locator.items[0].deliveryAddress.locality}    id=qdeliv_addr_locality
 ${locator.items[0].deliveryAddress.streetAddress}    id=qdeliv_addrstreet
 ${locator.items[0].classification.scheme}    id=scheme2015
@@ -52,7 +53,7 @@ ${locator.questions[0].description}    id=label_question_description
 ${locator.questions[0].date}    xpath=//div[@class="col-md-2 text-right"][@style="font-size: 11px; color: black;"]
 ${locator.items.deliveryDate.endDate}    /div/div/div[4]/div[2]/p/span    #deliv_date_end
 ${locator.value.currency}    id=lblTenderCurrency2
-${locator.items[0].deliveryAddress.region}    id=qdeliv_addr_region
+${locator.items[0].deliveryAddress.region}    id=_qdeliv_addr_region
 ${locator.items[0].unit.code}    id=measure_prozorro_code
 ${locator.items[0].unit.name}    id=measure_name
 ${locator.items[0].quantity}    id=quantity
