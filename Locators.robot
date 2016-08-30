@@ -3,7 +3,7 @@ Resource          aps.robot
 
 *** Variables ***
 ${item_index}     0
-${locator.tenderID}    xpath=//span[@id='titleTenderCode']
+${locator.tenderID}    id=titleTenderUcode
 ${locatorDeals}    tab_view_bids
 ${locatot.cabinetEnter}    id=login_ribbon
 ${locator.emailField}    id=LoginBox
@@ -26,7 +26,7 @@ ${locator.informationTable}    xpath=//li[@id='tab1']
 ${locator.title}    id=edtTenderTitle
 ${locator.descriptions}    id=edtTenderDetail
 ${locator.value.amount}    id=edtTenderBudget
-${locator.tenderId}    id=titleTenderCode
+${locator.tenderId}    id=titleTenderUcode
 ${locator.procuringEntity.name}    id=author_legal_name
 ${locator.enquiryPeriod.startDate}    id=date_enquiry_start
 ${locator.enquiryPeriod.endDate}    id=date_enquiry_end

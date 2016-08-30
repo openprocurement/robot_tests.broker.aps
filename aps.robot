@@ -85,19 +85,13 @@ Resource          Locators.robot
     [Arguments]    ${username}    ${tender_UAid}
     [Documentation]    ${ARGUMENTS[0]} == username
     ...    ${ARGUMENTS[1]} == tenderId
-    Run Keyword If    '${TEST NAME}' == 'Можливість знайти однопредметний тендер по ідентифікатору'    Sleep    300
-    #Sleep    200
-    #Run Keyword And Return If    '${username}' == 'aps_Viewer'    SearchIdViewer    ${tender_UAid}    ${username}
+    Run Keyword If    '${TEST NAME}' == 'Можливість знайти однопредметний тендер по ідентифікатору'    Sleep    180
     Run Keyword If    '${username}' == 'aps_Viewer'    Go To    ${USERS.users['${username}'].homepage}/#testmodeOn    #SearchIdViewer    ${tender_UAid}    ${username}
     Run Keyword Unless    '${username}' == 'aps_Viewer'    Go To    ${USERS.users['${username}'].homepage}
     WaitInputXPATH    //input[@id='search_text']    ${tender_UAid}
-    #Log To Console    'search_text - '+ ${tender_UAid}
     WaitClickID    search_btn
-    #Log To Console    click search_btn
     Wait Until Page Contains Element    xpath=//div[@id="list_tenders"]//span[@id="ASPxLabel3"]    10
-    #Log To Console    (//div[@id="list_tenders"]//span[@id="ASPxLabel3"])[text()="${tender_UAid}"]/../../../../a/p
     WaitClickXPATH    (//div[@id="list_tenders"]//span[@id="ASPxLabel3"])[text()="${tender_UAid}"]/../../../../a/p    #(//p[@class='cut_title'])[last()]
-    #Log To Console    click P
 
 Подати цінову пропозицію
     [Arguments]    @{ARGUMENTS}
@@ -173,6 +167,9 @@ Login
     aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     WaitClickXPATH    //a[@href="#questions"]
     WaitClickID    addQuestButton
+    #Run Keyword And Ignore Error    Select From List By Label    лоту    # Вопрос к лоту с последующим выбором его
+    #Run Keyword And Ignore Error    Select From List By Label    позиції    # Вопрос к позиции \ с последующим выбором ее
+    #Run Keyword And Ignore Error    Select From List By Label    закупівлі    # Вопрос к закупке
     WaitInputID    editQuestionTitle    ${title}
     WaitInputID    editQuestionDetails    ${description}
     sleep    2
@@ -185,22 +182,15 @@ Login
     ...    ${ARGUMENTS[1]} = tenderUaId
     ...    ${ARGUMENTS[2]} = 0
     ...    ${ARGUMENTS[3]} = answer_data
-    sleep    150
+    sleep    180
     ${answer}=    Get From Dictionary    ${ARGUMENTS[3].data}    answer
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
     aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     WaitClickXPATH    //a[@href="#questions"]
-    #Run Keyword If    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'    Click Element    xpath=//div[@class="col-md-5"]/p[contains(text(),"Лот 1")]
-    #Run Keyword If    '${TEST NAME}' == 'Можливість оголосити однопредметний тендер'    Click Element    css=div.panel-title > div.row > div.col-md-9
-    Log To Console    t1
     WaitClickID    questionTitlespan1
-    Log To Console    t2
     WaitClickID    answerQuestion
-    Log To Console    t3
     WaitInputID    editAnswerDetails    ${answer}
-    Log To Console    t4
     WaitClickID    AddQuestionButton
-    Log To Console    t5
     Reload Page
     Wait Until Page Contains    ${answer}    30
 
@@ -251,7 +241,7 @@ Login
     [Documentation]    ${ARGUMENTS[0]} == username
     ...    ${ARGUMENTS[1]} == file
     ...    ${ARGUMENTS[2]} == tenderId
-    Sleep    50
+    Sleep    10
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
     Reload Page
     WaitClickID    ${locatorDeals}
@@ -291,7 +281,7 @@ Login
     Sleep    10
     Wait Until Page Contains Element    id=labelTenderStatus
     ${value}=    Get Text    id=labelTenderStatus
-    Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати цінову пропозицію першим учасником'    Sleep    120
+    Run Keyword If    '${TEST NAME}' == 'Можливість подати цінову пропозицію першим учасником'    Sleep    60
     Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати цінову пропозицію першим учасником'    Active.tendering_provider    ${value}
     Run Keyword And Return If    '${TEST NAME}' == 'Можливість подати повторно цінову пропозицію першим учасником'    Active.tendering_provider    ${value}
     Run Keyword And Return If    '${TEST NAME}' == 'Можливість вичитати посилання на участь в аукціоні для першого учасника'    Active.auction_viewer    ${value}
@@ -301,7 +291,7 @@ Login
 
 Active.tendering_provider
     [Arguments]    ${value}
-    Sleep    60
+    Sleep    20
     ${return_value}=    Replace String    ${value}    Прийом пропозицій    active.tendering
     [Return]    ${return_value}
 

@@ -124,7 +124,7 @@ Library           aps_service.py
     Element Should Not Be Visible    id=divAlert    message='Error public'
     WaitClickID    btnView
     ${starttime}=    Get Current Date
-    ${tender_id}=    Get Text    id=titleTenderCode
+    ${tender_id}=    Get Text    id=titleTenderUcode
     [Return]    ${tender_id}
 
 TenderInfo
