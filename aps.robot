@@ -370,7 +370,7 @@ Active.auction_viewer
 Отримати інформацію із лоту
     [Arguments]    ${username}    ${tender_uaid}    ${lot_id}    ${field_name}
     Switch Browser    ${username}
-    Run Keyword If    '${TEST NAME}' == 'Відображення опису лотів'    WaitClickXPATH    //div[@id="headingThree"]/h4/div/div/p/b[contains(text(), '${lot_id}')]
+    Run Keyword If    '${field_name}' == 'lots.value.amount'    WaitClickXPATH    //div[@id="headingThree"]/h4/div/div/p/b[contains(text(), '${lot_id}')]
     sleep    5
     ${lot_value}=    Get Text    xpath=//div[@id="headingThree"]/h4/div/div/p/b[contains(text(), '${lot_id}')]/../../../..${locator.lots.${field_name}}
     ${lot_value}=    Convert To String    ${lot_value}
