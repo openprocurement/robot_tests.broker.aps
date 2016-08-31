@@ -262,14 +262,6 @@ Login
 
 Отримати посилання на аукціон для учасника
     [Arguments]    @{ARGUMENTS}
-    #Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-    #Click Element    xpath=//div[@id='bs-example-navbar-collapse-1']/div/div/a/img[2]
-    #Sleep    2
-    #Clear Element Text    id=topsearch
-    #Click Element    id=inprogress
-    #Input Text    id=topsearch    ${ARGUMENTS[1]}
-    #Click Element    id=btnSearch
-    #Click Element    xpath=//p[@class='cut_title']
     Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
     aps.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}    ${ARGUMENTS[1]}
     Sleep    2
@@ -374,18 +366,14 @@ Active.auction_viewer
     Run Keyword And Ignore Error    Click Element    xpath=.//*[@id='divLotsPropositionsSwitch']/ul/li/a[contains(text(), "${lots_ids}")]
     Input Text    id=editBid    ${bid}
     Click Element    id=addBidButton
-    sleep    2
-    Reload Page
-    ${resp}=    Get Value    id=my_bid_id
 
 Отримати інформацію із лоту
     [Arguments]    ${username}    ${tender_uaid}    ${lot_id}    ${field_name}
     Switch Browser    ${username}
-    Run Keyword If    '${TEST NAME}' == 'Відображення опису лотів'    aps.Пошук тендера по ідентифікатору    ${username}    ${tender_uaid}
     Run Keyword If    '${TEST NAME}' == 'Відображення опису лотів'    WaitClickXPATH    //div[@id="headingThree"]/h4/div/div/p/b[contains(text(), '${lot_id}')]
     sleep    5
     ${lot_value}=    Get Text    xpath=//div[@id="headingThree"]/h4/div/div/p/b[contains(text(), '${lot_id}')]/../../../..${locator.lots.${field_name}}
     ${lot_value}=    Convert To String    ${lot_value}
-    Run Keyword And Return If    '${TEST NAME}' == 'Відображення бюджету лотів'    lots.value.amount    ${lot_value}
-    Run Keyword And Return If    '${TEST NAME}' == 'Відображення ПДВ в бюджеті лотів'    valueAddedTaxIncluded    ${lot_value}
+    Run Keyword And Return If    '${field_name}' == 'lots.value.amount'    lots.value.amount    ${lot_value}
+    Run Keyword And Return If    '${field_name}' == 'lots.value.AddedTaxIncluded'    valueAddedTaxIncluded    ${lot_value}
     [Return]    ${lot_value}

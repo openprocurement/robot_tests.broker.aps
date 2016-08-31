@@ -19,7 +19,6 @@ Library           aps_service.py
     ${editItemDetails}=    Get From Dictionary    ${item}    description
     WaitInputID    editItemDetails    ${editItemDetails}
     Run Keyword And Ignore Error    Select From List By Label    id=lot_combo    ${lot_title}
-    \    #    '${TEST NAME}' == 'Можливість оголосити мультилотовий тендер'
     ${unit}=    Get From Dictionary    ${item}    unit
     ${tov}=    Get From Dictionary    ${unit}    code
     ${editItemQuantity}=    Get From Dictionary    ${item}    quantity
